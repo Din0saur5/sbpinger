@@ -1,5 +1,7 @@
+const express = require("express");
 const fetch = require("node-fetch");
 const cron = require("node-cron");
+require("dotenv").config();
 
 // Load environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -66,3 +68,17 @@ cron.schedule("0 0 * * *", () => {
 });
 
 console.log("Scheduled tasks initialized.");
+
+// Set up Express server
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Basic health check endpoint
+app.get("/", (req, res) => {
+    res.send("The scheduled task service is running!");
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`);
+});
