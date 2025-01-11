@@ -56,13 +56,13 @@ const sendFetchRequest = async () => {
 };
 
 // Schedule the POST request to run twice a week
-cron.schedule("0 0 * * 1,4", () => {
+cron.schedule("0 0 * * *", () => {
     console.log("Executing POST request (twice a week)");
     sendPostRequest();
 });
 
 // Schedule the FETCH request to run once a day
-cron.schedule("0 0 * * *", () => {
+cron.schedule("40 */1 * * *", () => {
     console.log("Executing FETCH request (once a day)");
     sendFetchRequest();
 });
