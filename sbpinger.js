@@ -16,7 +16,7 @@ const headers = {
 
 // Variables to track next schedule
 let latestPost = "Fetching latest post...";
-let nextScheduledTime = calculateNextRun("0 0 * * *");
+let nextScheduledTime = calculateNextRun("0 12 * * *"); // Set to run at noon
 
 // Function to calculate the next cron job run time
 function calculateNextRun(cronExpression) {
@@ -62,11 +62,9 @@ const sendPostRequest = async () => {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            console.log("POST request successful:", data);
+            console.log("POST request successful:");
             // Fetch the latest post after a successful POST
             await fetchLatestPost();
-            nextScheduledTime = calculateNextRun("0 0 * * *");
         } else {
             console.error("POST request failed:", await response.text());
         }
@@ -75,8 +73,8 @@ const sendPostRequest = async () => {
     }
 };
 
-// Schedule the POST request to run once a day at midnight
-cron.schedule("0 0 * * *", () => {
+// Schedule the POST request to run once a day at noon
+cron.schedule("0 12 * * *", () => {
     console.log("Executing daily POST request");
     sendPostRequest();
 });
@@ -97,21 +95,36 @@ app.get("/", async (req, res) => {
                 <style>
                     body { font-family: Arial, sans-serif; text-align: center; margin-top: 20%; }
                     h1 { color: #333; }
+                    button { font-size: 16px; padding: 10px 20px; cursor: pointer; margin-top: 20px; }
                 </style>
             </head>
             <body>
                 <h1>Daily POST Scheduler</h1>
                 <p><strong>Latest POST:</strong> ${latestPost}</p>
                 <p><strong>Next Scheduled POST:</strong> ${nextScheduledTime}</p>
+                <button id="pingButton">Ping Now</button>
                 <script>
-                    setInterval(() => {
-                        window.location.reload();
-                    }, 60000); // Reload every minute to keep the display updated
+                    // Function to send POST request to the server when the button is clicked
+                    document.getElementById("pingButton").addEventListener("click", async () => {
+                        const response = await fetch("/ping-now", { method: "POST" });
+                        if (response.ok) {
+                            // Reload the page to reflect the new data
+                            window.location.reload();
+                        } else {
+                            alert("Failed to ping now.");
+                        }
+                    });
                 </script>
             </body>
         </html>
     `;
     res.send(html);
+});
+
+// Create a new endpoint to handle the "Ping Now" button click
+app.post("/ping-now", async (req, res) => {
+    await sendPostRequest();  // Trigger the POST request function
+    res.status(201).send("Ping request sent successfully.");
 });
 
 // Start the server
